@@ -14,6 +14,11 @@ import (
 	"github.com/troymcgahey/go-client-spawner/internal/poller"
 )
 
+type Config struct {
+	DownstreamURL      string
+	PollIntervalValSec int
+}
+
 func main() {
 	ctx, stop := signal.NotifyContext(
 		context.Background(),
@@ -27,12 +32,16 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	downstreamURL := os.Getenv("DOWNSTREAM_URL")
-	intervalSeconds, err := strconv.Atoi(os.Getenv("POLL_INTERVAL_SECONDS"))
+	cfg := LoadConfig()
+
+	log.Println(cfg.DownstreamURL)
+	log.Println(cfg.PollIntervalValSec)
+
+	time.Sleep(10 * time.Second)
 
 	p := poller.NewPoller(
-		downstreamURL,
-		time.Duration(intervalSeconds)*time.Second,
+		cfg.DownstreamURL,
+		time.Duration(cfg.PollIntervalValSec)*time.Second,
 	)
 
 	go p.Start(ctx)
@@ -45,12 +54,12 @@ func main() {
 	})
 
 	server := &http.Server{
-		Addr:    ":8080",
+		Addr:    ":8081",
 		Handler: mux,
 	}
 
 	go func() {
-		log.Println("server listening on :8080")
+		log.Println("server listening on :8081")
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("server failed: %v", err)
 		}
@@ -63,4 +72,21 @@ func main() {
 
 	log.Println("shutting down server")
 	server.Shutdown(shutdownCtx)
+}
+
+func LoadConfig() Config {
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	DownstreamURL := os.Getenv("DOWNSTREAM_URL")
+	PollIntervalValSec, err := strconv.Atoi(os.Getenv("POLL_INTERVAL_SECONDS"))
+
+	return Config{
+		DownstreamURL:      DownstreamURL,
+		PollIntervalValSec: PollIntervalValSec,
+	}
+
 }
