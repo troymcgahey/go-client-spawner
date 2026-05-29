@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/troymcgahey/go-client-spawner/internal/poller"
 )
 
@@ -21,8 +22,13 @@ func main() {
 	)
 	defer stop()
 
-	downstreamURL := getEnv("DOWNSTREAM_URL", "https:/httpbin.org/status/200")
-	intervalSeconds := getEnvInt("POLL_INTERVAL_SECONDS", 10)
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	downstreamURL := os.Getenv("DOWNSTREAM_URL")
+	intervalSeconds, err := strconv.Atoi(os.Getenv("POLL_INTERVAL_SECONDS"))
 
 	p := poller.NewPoller(
 		downstreamURL,
@@ -57,26 +63,4 @@ func main() {
 
 	log.Println("shutting down server")
 	server.Shutdown(shutdownCtx)
-}
-
-func getEnv(key, defaultValue string) string {
-	value := os.Getenv(key)
-	if value == "" {
-		return defaultValue
-	}
-	return value
-}
-
-func getEnvInt(key string, defaultValue int) int {
-	value := os.Getenv(key)
-	if value == "" {
-		return defaultValue
-	}
-
-	parsed, err := strconv.Atoi(value)
-	if err != nil {
-		return defaultValue
-	}
-
-	return parsed
 }
