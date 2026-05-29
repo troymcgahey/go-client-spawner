@@ -20,7 +20,7 @@ func main() {
 	defer stop()
 
 	downstreamURL := getEnv("DOWNSTREAM_URL", "https:/httpbin.org/status/200")
-	intervalSeconds := -getEnvInt("POLL_INTERVAL_SECONDS", 10)
+	intervalSeconds := getEnvInt("POLL_INTERVAL_SECONDS", 10)
 
 	p := Poller.newPoller(
 		downstreamURL,
