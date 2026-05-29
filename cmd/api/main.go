@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"syscall"
 	"time"
+
+	"github.com/troymcgahey/go-client-spawner/internal/poller"
 )
 
 func main() {
@@ -22,7 +24,7 @@ func main() {
 	downstreamURL := getEnv("DOWNSTREAM_URL", "https:/httpbin.org/status/200")
 	intervalSeconds := getEnvInt("POLL_INTERVAL_SECONDS", 10)
 
-	p := Poller.newPoller(
+	p := poller.NewPoller(
 		downstreamURL,
 		time.Duration(intervalSeconds)*time.Second,
 	)
@@ -31,7 +33,7 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("healthz", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("ok"))
 	})
