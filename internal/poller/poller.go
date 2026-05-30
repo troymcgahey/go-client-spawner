@@ -18,7 +18,7 @@ func NewPoller(url string, interval time.Duration) *Poller {
 		url:      url,
 		interval: interval,
 		client: &http.Client{
-			Timeout: 5 * time.Second,
+			Timeout: 10 * time.Second,
 			Transport: &http.Transport{
 				MaxIdleConns:        100,
 				MaxIdleConnsPerHost: 20,

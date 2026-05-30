@@ -37,8 +37,6 @@ func main() {
 	log.Println(cfg.DownstreamURL)
 	log.Println(cfg.PollIntervalValSec)
 
-	time.Sleep(10 * time.Second)
-
 	p := poller.NewPoller(
 		cfg.DownstreamURL,
 		time.Duration(cfg.PollIntervalValSec)*time.Second,
